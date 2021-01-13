@@ -17,15 +17,18 @@ RUN rm -r temp-html
 RUN chmod -R 776 html
 RUN chown -R www-data:www-data html
 
-#COPY --chown=www-data:www-data src .
-COPY parameters.php ./app/config/parameters.php
-
 #SSL
 RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt -subj "/C=PL/ST=Pomorskie/L=Gdansk/O=efilmy/OU=efilmy/CN=efilmy.best/emailAddress=belektroniczny@gmail.com"
 
-COPY ssl-params.conf /etc/apache2/conf-available/
-COPY default-ssl.conf /etc/apache2/sites-available/
-COPY 000-default.conf /etc/apache2/sites-available/
+#Configs
+
+RUN mkdir temp-config
+RUN git clone https://github.com/P-Biznes-Elektroniczny/Config.git temp-config
+RUN mv ./temp-config/parameters.php ./app/config/parameters.php
+RUN mv  ./temp-config/ssl-params.conf /etc/apache2/conf-available/
+RUN mv ./temp-config/default-ssl.conf /etc/apache2/sites-available/
+RUN mv ./temp-config/000-default.conf /etc/apache2/sites-available/
+RUN rm -r temp-config
 
 RUN a2enmod ssl
 RUN a2ensite default-ssl
